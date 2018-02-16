@@ -385,22 +385,20 @@ class <proxyShortClassName> extends \<className> implements \<baseProxyInterface
     public function __construct($initializer = null, $cloner = null)
     {
 
-EOT;
-        $toUnset         = [];
-
-        foreach ($this->getLazyLoadedPublicProperties($class) as $lazyPublicProperty => $unused) {
-            $toUnset[] = '$this->' . $lazyPublicProperty;
-        }
-
-        $constructorImpl .= (empty($toUnset) ? '' : '        unset(' . implode(', ', $toUnset) . ");\n")
-            . <<<'EOT'
 
         $this->__initializer__ = $initializer;
         $this->__cloner__      = $cloner;
     }
 EOT;
+        $toUnset = [];
 
-        return $constructorImpl;
+        foreach ($this->getLazyLoadedPublicProperties($class) as $lazyPublicProperty => $unused) {
+            $toUnset[] = '$this->' . $lazyPublicProperty;
+        }
+
+        $toUnset = (empty($toUnset) ? '' : sprintf("        unset(%s);\n", implode(', ', $toUnset)));
+
+        return sprintf($constructorImpl, $toUnset);
     }
 
     /**
